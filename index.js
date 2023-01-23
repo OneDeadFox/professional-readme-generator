@@ -16,16 +16,9 @@ const initialQuestions = {
 
 const inputQuestions = ['Provide a description of your project: ', 'Provide installation instructions: ', 'Provide usage details: ',  'Provide contribution guidlines: ', 'Provide testing details: ', 'Provide your Github username: ', 'Provide email for answering user questions: ']
 
-//TODO: Create a function that will make new folders for the README files
-// async function makeDirectory(element){
-//     try {
-//         const createDir = await mkdir(projectFolder, { recursive: true });
-    
-//         console.log(`created ${createDir}`);
-//     } catch (err) {
-//         console.error(err.message);
-//     }
-// }
+function makeDirectory(title){
+    fs.mk
+}
 
 // TODO: Create a function to write README file
 function writeReadme(content, section, header){
@@ -43,8 +36,8 @@ function writeReadme(content, section, header){
         err ? console.error(err) : console.log(`${section} successfully added to README`));
     }else{
         //create README and give it a title
-        fs.writeFile('README.md', `# ${content}\n\n\n`, (err) =>
-        err ? console.error(err) : console.log(`${section} successfully added to README`));
+        fs.mkdirSync(`./${content}-docs`, (err) => err ? console.error(err) : console.log(''));
+        fs.writeFile(`./.${content}-docs/README.md`, `# ${content}\n\n\n`, (err) => err ? console.error(err) : console.log(`${section} successfully added to README`));
     }
 }
 // TODO: Create a function to initialize app
@@ -68,19 +61,63 @@ function init() {
         .then((res) => {
             //remove 'Questions' and add keywords to array for nextQuestion search
             //setTimeout is used to make nextQuestion() prompt appear after success or error message from writeReadme()
-            makeDirectory();
 
             if(res.sections.includes('Questions')){
                 res.sections.pop();
                 res.sections.push('username');
                 res.sections.push('email');
                 setTimeout(() => {writeReadme(res.title, 'title')}, 0);
-                setTimeout(() => {nextQuestion(res.sections)}, 100);
+                setTimeout(() => {licenseSelect(res.sections)}, 100);
             }else{
                 setTimeout(() => {writeReadme(res.title, 'title')}, 0);
-                setTimeout(() => {nextQuestion(res.sections)}, 100);
+                setTimeout(() => {licenseSelect(res.sections)}, 100);
             }
         });
+
+// Function to fetch licenses and prompt user to select one
+function licenseSelect(element){
+    const licenseUrl = 'https://api.github.com/licenses';
+    const sections = element
+    fetch(licenseUrl)
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(data){
+                console.log(data);
+                let licesnseData = [];
+                let licenses = [];
+                for (let i = 0; i < data.length; i++) {
+                    const element = data[i];
+                    licenses.push(element.name);
+                    licesnseData.push(element);
+                }
+                licenses.unshift('None');
+                inquirer
+                    .prompt([
+                        {
+                            type: 'list',
+                            message: 'Please select a license from the following list:',
+                            choices: licenses,
+                            pageSize: 11,
+                            loop: false,
+                            name: 'licenseSelection'
+                        }
+                    ])
+                    .then((res) => {
+                        //this is kind of silly because I could complete the following steps in this then statement but i'm going to send it to utils anyways.
+                        if(res.licenseSelection != 'None'){
+                            const licenseObj = licesnseData.find(obj => obj.name === res.licenseSelection);
+
+                            licFn.fetchLicense(licenseUrl + '/' + licenseObj.spdx_id);
+                        } else {
+                            licFn.fetchLicense(res.licenseSelection);
+                        }
+
+                        setTimeout(() => {nextQuestion(sections)}, 100);
+                        
+                    });
+            });
+}
 
     function nextQuestion(arr){
             //find arr[0]'s value in inputQuestions to load next appropriate question into inquirer
@@ -118,48 +155,12 @@ function init() {
                             if(arr.length > 0){
                                 nextQuestion(arr);
                             }else{
-                                licenseSelect();
+                                console.log('Documentation generation has been completed.');
                             }
                         }, 10);
                 });
     }
 }
 
-// Function to fetch licenses and prompt user to select one
-function licenseSelect(){
-    const licenseUrl = 'https://api.github.com/licenses'
-    fetch(licenseUrl)
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                console.log(data);
-                let licesnseData = [];
-                let licenses = [];
-                for (let i = 0; i < data.length; i++) {
-                    const element = data[i];
-                    licenses.push(element.name);
-                    licesnseData.push(element);
-                }
-                licenses.unshift('None');
-                inquirer
-                    .prompt([
-                        {
-                            type: 'list',
-                            message: 'Please select a license from the following list:',
-                            choices: licenses,
-                            pageSize: 11,
-                            loop: false,
-                            name: 'licenseSelection'
-                        }
-                    ])
-                    .then((res) => {
-                        //this is kind of silly because I could complete the following steps in this then statement but i'm going to send it to utils anyways.
-                        const licensesId = licesnseData.find(obj => obj.name === res.licenseSelection);
-                        
-            });
-}
-
 // Function call to initialize app
-//init();
-licenseSelect();
+init();
