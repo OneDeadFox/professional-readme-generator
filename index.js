@@ -17,10 +17,8 @@ const initialQuestions = {
 
 const inputQuestions = ['Provide a description of your project: ', 'Provide installation instructions: ', 'Provide usage details: ',  'Provide contribution guidlines: ', 'Provide testing details: ', 'Provide your Github username: ', 'Provide email for answering user questions: ']
 
-function makeDirectory(title){
-    const revisedTitle = title.replace(/\s/g, "-").toLowerCase();
-
-    fs.mkdirSync(`./${revisedTitle}-docs`, (err) => err ? console.error(err) : console.log(''));
+function makeDirectory(){
+    fs.mkdirSync(`./${globalDirectory}-docs`, (err) => err ? console.error(err) : console.log(''));
 }
 
 // TODO: Create a function to write README file
@@ -30,12 +28,12 @@ function writeReadme(content, section, header){
     console.log('line 33 = ' + section);
     if(section != 'Title'){
         //adds appropriate sections and data
-        fs.appendFile('README.md', `### ${header}\n`, function(err){
+        fs.appendFile(`./${globalDirectory}-docs/README.md`, `### ${header}\n`, function(err){
             if(err){
                 console.log(err)
             }
         });
-        fs.appendFile('README.md', `${content}\n\n\n`, (err) =>
+        fs.appendFile(`./${globalDirectory}-docs/README.md`, `${content}\n\n\n`, (err) =>
         err ? console.error(err) : console.log(`${section} successfully added to README`));
     }else{
         //create README and give it a title
@@ -63,17 +61,19 @@ function init() {
         .then((res) => {
             //remove 'Questions' and add keywords to array for nextQuestion search
             //setTimeout is used to make nextQuestion() prompt appear after success or error message from writeReadme()
+            globalDirectory = res.title.replace(/\s/g, "-").toLowerCase();
+            console.log(globalDirectory);
+            
 
             if(res.sections.includes('Questions')){
-                globalDirectory = res.title.replace(/\s/g, "-").toLowerCase();
                 res.sections.pop();
                 res.sections.push('username');
                 res.sections.push('email');
-                setTimeout(() => {makeDirectory(globalDirectory)}, 0);
+                setTimeout(() => {makeDirectory()}, 0);
                 setTimeout(() => {writeReadme(res.title, 'title')}, 100);
                 setTimeout(() => {licenseSelect(res.sections)}, 200);
             }else{
-                setTimeout(() => {makeDirectory(globalDirectory)}, 0);
+                setTimeout(() => {makeDirectory()}, 0);
                 setTimeout(() => {writeReadme(res.title, 'title')}, 100);
                 setTimeout(() => {licenseSelect(res.sections)}, 200);
             }
