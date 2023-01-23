@@ -37,13 +37,19 @@ function writeReadme(content, section, header){
         err ? console.error(err) : console.log(`${section} successfully added to README`));
     }else{
         //create README and give it a title
+
         fs.writeFile(`./${globalDirectory}-docs/README.md`, `# ${content}\n\n\n`, (err) => err ? console.error(err) : console.log(`${section} successfully added to README`));
     }
 }
 // TODO: Create a function to initialize app
 // TODO: have app console.log instructions for data entry
-function init() {
+async function init() {
     console.log('Please answer the set of following prompts to generate a README file.');
+    // licenseSelect().then()
+    // fetch licenses here
+    //.then(
+
+    // )
     inquirer
         .prompt([
             {
@@ -51,38 +57,18 @@ function init() {
                 message: initialQuestions.titleQuestion,
                 name: 'title'
             },
-            {
-                type: 'checkbox',
-                message: initialQuestions.checkbox,
-                choices: initialQuestions.choices,
-                name: 'sections'
-            }
+            //
         ])
         .then((res) => {
-            //remove 'Questions' and add keywords to array for nextQuestion search
-            //setTimeout is used to make nextQuestion() prompt appear after success or error message from writeReadme()
             globalDirectory = res.title.replace(/\s/g, "-").toLowerCase();
-            console.log(globalDirectory);
-            
-
-            if(res.sections.includes('Questions')){
-                res.sections.pop();
-                res.sections.push('username');
-                res.sections.push('email');
-                setTimeout(() => {makeDirectory()}, 0);
-                setTimeout(() => {writeReadme(res.title, 'title')}, 100);
-                setTimeout(() => {licenseSelect(res.sections)}, 200);
-            }else{
-                setTimeout(() => {makeDirectory()}, 0);
-                setTimeout(() => {writeReadme(res.title, 'title')}, 100);
-                setTimeout(() => {licenseSelect(res.sections)}, 200);
-            }
+            console.log(res);
+            makeDirectory()
+            writeReadme(res.title, 'title');
+            licenseSelect();
         });
-
 // Function to fetch licenses and prompt user to select one
-function licenseSelect(element){
+function licenseSelect(){
     const licenseUrl = 'https://api.github.com/licenses';
-    const sections = element
     fetch(licenseUrl)
             .then(function(response){
                 return response.json();
@@ -117,11 +103,42 @@ function licenseSelect(element){
                         } else {
                             licFn.fetchLicense(res.licenseSelection, globalDirectory);
                         }
-
-                        setTimeout(() => {nextQuestion(sections)}, 100);
+                        
+                        sectionSelect();
+                        
+                        
                         
                     });
             });
+}
+
+function sectionSelect(){
+    
+    inquirer
+        .prompt([
+            {
+                type: 'checkbox',
+                message: initialQuestions.checkbox,
+                choices: initialQuestions.choices,
+                name: 'sections'
+            }
+        ])
+        .then((res) => {
+            console.log(res.sections)
+            if(res.sections[0] === undefined){
+                console.log('Please select at least 1 section to include in README.')
+                sectionSelect();
+            }else if(res.sections.includes('Questions')){
+                res.sections.pop();
+                res.sections.push('username');
+                res.sections.push('email');
+                nextQuestion(res.sections);
+            }else{
+                nextQuestion(res.sections);
+            }
+        });
+
+    
 }
 
     function nextQuestion(arr){
@@ -145,15 +162,6 @@ function licenseSelect(element){
                     }
                     ])
                     .then((res) => {
-                        //remove first entry and repeat this function if > 0
-                        //setTimeout is used to make nextQuestion() prompt appear after success or error message from writeReadme()
-                        // const name = arrValue
-                        // //console.log('line 106 = ' + JSON.parse(res));
-                        // console.log('line 106 = ' + JSON.stringify(res));
-                        // console.log('line 107 = ' + res.name);
-                        // console.log('line 108 = ' + res.arrValue);
-                        // console.log('line 109 = ' + res.name);
-                        // console.log('line 110 = ' + name);
                         setTimeout(() => {writeReadme(res.answer, arr[0], arr[0])}, 0);
                         setTimeout(() => {
                             arr.splice(0,1);
