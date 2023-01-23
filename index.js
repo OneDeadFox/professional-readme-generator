@@ -5,6 +5,7 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 const licFn = require('./utils/generateMarkdown');
+var globalDirectory;
 
 // TODO: Create an object of questions for user input
     //1. Have questions associated with conditional statements reflecting checkbox choices
@@ -17,7 +18,9 @@ const initialQuestions = {
 const inputQuestions = ['Provide a description of your project: ', 'Provide installation instructions: ', 'Provide usage details: ',  'Provide contribution guidlines: ', 'Provide testing details: ', 'Provide your Github username: ', 'Provide email for answering user questions: ']
 
 function makeDirectory(title){
-    fs.mk
+    const revisedTitle = title.replace(/\s/g, "-").toLowerCase();
+
+    fs.mkdirSync(`./${revisedTitle}-docs`, (err) => err ? console.error(err) : console.log(''));
 }
 
 // TODO: Create a function to write README file
@@ -36,8 +39,7 @@ function writeReadme(content, section, header){
         err ? console.error(err) : console.log(`${section} successfully added to README`));
     }else{
         //create README and give it a title
-        fs.mkdirSync(`./${content}-docs`, (err) => err ? console.error(err) : console.log(''));
-        fs.writeFile(`./.${content}-docs/README.md`, `# ${content}\n\n\n`, (err) => err ? console.error(err) : console.log(`${section} successfully added to README`));
+        fs.writeFile(`./${globalDirectory}-docs/README.md`, `# ${content}\n\n\n`, (err) => err ? console.error(err) : console.log(`${section} successfully added to README`));
     }
 }
 // TODO: Create a function to initialize app
@@ -63,14 +65,17 @@ function init() {
             //setTimeout is used to make nextQuestion() prompt appear after success or error message from writeReadme()
 
             if(res.sections.includes('Questions')){
+                globalDirectory = res.title.replace(/\s/g, "-").toLowerCase();
                 res.sections.pop();
                 res.sections.push('username');
                 res.sections.push('email');
-                setTimeout(() => {writeReadme(res.title, 'title')}, 0);
-                setTimeout(() => {licenseSelect(res.sections)}, 100);
+                setTimeout(() => {makeDirectory(globalDirectory)}, 0);
+                setTimeout(() => {writeReadme(res.title, 'title')}, 100);
+                setTimeout(() => {licenseSelect(res.sections)}, 200);
             }else{
-                setTimeout(() => {writeReadme(res.title, 'title')}, 0);
-                setTimeout(() => {licenseSelect(res.sections)}, 100);
+                setTimeout(() => {makeDirectory(globalDirectory)}, 0);
+                setTimeout(() => {writeReadme(res.title, 'title')}, 100);
+                setTimeout(() => {licenseSelect(res.sections)}, 200);
             }
         });
 
@@ -108,9 +113,9 @@ function licenseSelect(element){
                         if(res.licenseSelection != 'None'){
                             const licenseObj = licesnseData.find(obj => obj.name === res.licenseSelection);
 
-                            licFn.fetchLicense(licenseUrl + '/' + licenseObj.spdx_id);
+                            licFn.fetchLicense(licenseUrl + '/' + licenseObj.spdx_id, globalDirectory);
                         } else {
-                            licFn.fetchLicense(res.licenseSelection);
+                            licFn.fetchLicense(res.licenseSelection, globalDirectory);
                         }
 
                         setTimeout(() => {nextQuestion(sections)}, 100);
