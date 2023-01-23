@@ -16,7 +16,7 @@ function fetchLicense(url, directory){
           })
       } else {
         console.log('No license has been provided for this application.')
-        fs.rm(`./${globalDirectory}-docs/LICENSE`, function(err){
+        fs.rm(`./docs/${globalDirectory}-docs/LICENSE`, function(err){
             if(err){
                 console.log(err)
             }
@@ -25,11 +25,11 @@ function fetchLicense(url, directory){
 }
 
 function renderLicenseBadge(license, link, description) {
-    fs.appendFile(`./${globalDirectory}-docs/README.md`, `[![License](https://img.shields.io/badge/License-${license}-blue.svg)](${link})\n${description}\n\n\n`, (err) => err ? console.error(err) : console.log(`license badge successfully added to README.`));
+    fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `[![License](https://img.shields.io/badge/License-${license}-blue.svg)](${link})\n${description}\n\n\n`, (err) => err ? console.error(err) : console.log(``));
 }
 
 function generateMarkdown(data) {
-    fs.writeFile(`./${globalDirectory}-docs/LICENSE`, `${data}`, (err) => err ? console.error(err) : console.log(`LINCENSE document successfully generated.`));
+    fs.writeFile(`./docs/${globalDirectory}-docs/LICENSE`, `${data}`, (err) => err ? console.error(err) : console.log(``));
 }
 
 module.exports = {
