@@ -50,11 +50,13 @@ function writeReadme(content, section, header){
                 console.log(err)
             }
         });
-        fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `${content}\n\n\n\n`, function(err){
-            if(err){
-                console.log(err)
-            }
-        });;
+        setTimeout(() => {
+            fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `${content}\n\n\n\n`, function(err){
+                if(err){
+                    console.log(err)
+                }
+            });
+        }, 100);
     }else{
         //create README and give it a title
 
@@ -188,7 +190,7 @@ function sectionSelect(){
                         .then((res) => {
                             fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `## Questions
                             
-If you have any questions or comments regarding my application please contact me at:\n\n \  Github: ${res.username}\n\n Email: ${res.email}`,
+If you have any questions or comments regarding my application please contact me:\n\n \  Github: [${res.username}](https://github.com/${res.username})\n\n Email: ${res.email}`,
                             function(err){
                                 if(err){
                                     console.log(err)
@@ -206,7 +208,6 @@ If you have any questions or comments regarding my application please contact me
                         }
                         ])
                         .then((res) => {
-                            console.log(arr[0]);
                             setTimeout(() => {writeReadme(res.answer, arr[0], arr[0])}, 0);
                             setTimeout(() => {
                                 arr.splice(0,1);

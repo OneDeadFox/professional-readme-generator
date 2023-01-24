@@ -11,7 +11,7 @@ function fetchLicense(url, directory){
           .then(function(data){
               const badgeName = data.spdx_id.replace(/-/g, '_');
             
-              renderLicenseBadge(badgeName, data.html_url, data.description);
+              renderLicenseBadge(badgeName, data.html_url);
               generateMarkdown(data.body);
           })
       } else {
@@ -19,8 +19,8 @@ function fetchLicense(url, directory){
         }
 }
 
-function renderLicenseBadge(license, link, description) {
-    fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `[![License](https://img.shields.io/badge/License-${license}-blue.svg)](${link})\n${description}\n\n\n`, function(err){
+function renderLicenseBadge(license, link) {
+    fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `[![License](https://img.shields.io/badge/License-${license}-blue.svg)](${link})\n\n\n`, function(err){
       if(err){
           console.log(err)
       }
