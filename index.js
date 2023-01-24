@@ -18,7 +18,11 @@ const initialQuestions = {
 const inputQuestions = ['Provide a description of your project: ', 'Provide installation instructions: ', 'Provide usage details: ',  'Provide contribution guidlines: ', 'Provide testing details: ', 'Provide your Github username: ', 'Provide email for answering user questions: ']
 
 function makeDirectory(){
-    fs.mkdirSync(`./docs/${globalDirectory}-docs`, (err) => err ? console.error(err) : console.log(''));
+    fs.mkdirSync(`./docs/${globalDirectory}-docs`, function(err){
+        if(err){
+            console.log(err)
+        }
+    });
 }
 
 function makeToc(sections){
@@ -27,28 +31,38 @@ function makeToc(sections){
         sectionsList += `   * [${section}](#${section})\n`
     }
     fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, 
-    `##Table of Contents\n${sectionsList}\n\n
-        `, (err) => err ? console.error(err) : console.log(''));
+    `## Table of Contents\n${sectionsList}\n\n`, function(err){
+        if(err){
+            console.log(err)
+        }
+    });
 }
 
 // TODO: Create a function to write README file
 function writeReadme(content, section, header){
-    console.log('section = ' + section);
+
     section = section.charAt(0).toUpperCase() + section.slice(1);
-    console.log('line 33 = ' + section);
+
     if(section != 'Title'){
         //adds appropriate sections and data
-        fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `##${header}\n`, function(err){
+        fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `## ${header}\n\n`, function(err){
             if(err){
                 console.log(err)
             }
         });
-        fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `${content}\n\n\n`, (err) =>
-        err ? console.error(err) : console.log(``));
+        fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `${content}\n\n\n\n`, function(err){
+            if(err){
+                console.log(err)
+            }
+        });;
     }else{
         //create README and give it a title
 
-        fs.writeFile(`./docs/${globalDirectory}-docs/README.md`, `#${content}\n\n\n`, (err) => err ? console.error(err) : console.log(``));
+        fs.writeFile(`./docs/${globalDirectory}-docs/README.md`, `# ${content}\n\n\n\n`, function(err){
+            if(err){
+                console.log(err)
+            }
+        });
     }
 }
 // Initalization----------------------------------------------------------
@@ -67,8 +81,6 @@ function init() {
         .then((res) => {
             
             globalDirectory = res.title.replace(/\s/g, "-").toLowerCase();
-            console.log(res);
-
             makeDirectory()
             writeReadme(res.title, 'title');
             licenseSelect();
@@ -82,7 +94,6 @@ function licenseSelect(){
                 return response.json();
             })
             .then(function(data){
-                console.log(data);
                 let licesnseData = [];
                 let licenses = [];
                 for (let i = 0; i < data.length; i++) {
@@ -132,19 +143,17 @@ function sectionSelect(){
             }
         ])
         .then((res) => {
-            console.log(res.sections)
             if(res.sections[0] === undefined){
                 console.log('Please select at least 1 section to include in README.')
                 sectionSelect();
             }else if(res.sections.includes('Questions')){
                 makeToc(res.sections);
-                // res.sections.pop();
-                // res.sections.push('username');
-                // res.sections.push('email');
-                nextQuestion(res.sections);
+                setTimeout(() => {
+                    nextQuestion(res.sections)}, 100);
             }else{
                 makeToc(res.sections);
-                nextQuestion(res.sections);
+                setTimeout(() => {
+                    nextQuestion(res.sections)}, 100);
             }
         });
 
@@ -161,8 +170,7 @@ function sectionSelect(){
                     nextIndex = i;
                 }
             }
-            console.log('testing array = ' + arr);
-            console.log(arr[0]);
+
             if(arr[0] === 'Questions'){
                 inquirer
                     .prompt([
@@ -180,10 +188,12 @@ function sectionSelect(){
                         .then((res) => {
                             fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `## Questions
                             
-If you have any questions or comments regarding my application please contact me at:
-    Github: ${res.username}
-    Email: ${res.email}`,
-                            (err) => err ? console.error(err) : console.log(``));
+If you have any questions or comments regarding my application please contact me at:\n\n \  Github: ${res.username}\n\n Email: ${res.email}`,
+                            function(err){
+                                if(err){
+                                    console.log(err)
+                                }
+                            });
                             console.log('Documentation generation has been completed.');
                     });
             }else{
@@ -196,6 +206,7 @@ If you have any questions or comments regarding my application please contact me
                         }
                         ])
                         .then((res) => {
+                            console.log(arr[0]);
                             setTimeout(() => {writeReadme(res.answer, arr[0], arr[0])}, 0);
                             setTimeout(() => {
                                 arr.splice(0,1);
@@ -204,7 +215,7 @@ If you have any questions or comments regarding my application please contact me
                                 }else{
                                     console.log('Documentation generation has been completed.');
                                 }
-                            }, 10);
+                            }, 100);
                     });
             }
     }
