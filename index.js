@@ -190,7 +190,7 @@ function sectionSelect(){
                         .then((res) => {
                             fs.appendFile(`./docs/${globalDirectory}-docs/README.md`, `## Questions
                             
-If you have any questions or comments regarding my application please contact me:\n\n \  Github: [${res.username}](https://github.com/${res.username})\n\n Email: ${res.email}`,
+If you have any questions or comments regarding my application please contact me:\n\n\  Github: [${res.username}](https://github.com/${res.username})\n\n    Email: ${res.email}`,
                             function(err){
                                 if(err){
                                     console.log(err)
